@@ -1,4 +1,8 @@
 <?php
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: text/plain');
 
@@ -18,7 +22,7 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 try {
     $pdo->beginTransaction();
-    $pdo->exec("UPDATE counter SET count = count + 1 WHERE id = 1");
+    $pdo->exec("UPDATE counter SET count = count + 1 WHERE id = 1 LIMIT 1");
     $stmt = $pdo->query("SELECT count FROM counter WHERE id = 1");
     $count = $stmt->fetch(PDO::FETCH_ASSOC);
     $pdo->commit();
