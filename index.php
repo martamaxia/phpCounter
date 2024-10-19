@@ -1,25 +1,32 @@
 <?php
-// Allow requests from any origin (or restrict to specific domain if needed)
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: text/plain');
 
-// File to store the count
-$file = 'counter.txt';
+// Get the database connection details from the environment variable
+$dbConn = parse_url(getenv("DATABASE_URL"));
 
-// Check if the file exists, if not, create it
-if (!file_exists($file)) {
-    file_put_contents($file, '0'); // Initialize the file with 0
+$pdo = new PDO("pgsql:" . sprintf(
+    "host=%s;port=%s;user=%s;password=%s;dbname=%s",
+    $dbConn['host'],
+    $dbConn['port'],
+    $dbConn['user'],
+    $dbConn['pass'],
+    ltrim($dbConn['path'], "/")
+));
+
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+try {
+    $pdo->beginTransaction();
+    $pdo->exec("UPDATE counter SET count = count + 1 WHERE id = 1");
+    $stmt = $pdo->query("SELECT count FROM counter WHERE id = 1");
+    $count = $stmt->fetch(PDO::FETCH_ASSOC);
+    $pdo->commit();
+    echo $count['count'];
+} catch (Exception $e) {
+    $pdo->rollBack();
+    echo "Failed: " . $e->getMessage();
 }
 
-// Read the current counter value from the file
-$count = (int) file_get_contents($file);
-
-// Increment the counter by 1
-$count++;
-
-// Write the updated count back to the file
-file_put_contents($file, $count);
-
-// Return the updated counter value
-echo $count;
+$pdo->close();
 ?>
