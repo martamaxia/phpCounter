@@ -22,7 +22,7 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 try {
     $pdo->beginTransaction();
-    $pdo->exec("UPDATE counter SET count = count + 1 WHERE id = 1 LIMIT 1");
+    $pdo->exec("UPDATE counter SET count = count + 1 WHERE id = 1");
     $stmt = $pdo->query("SELECT count FROM counter WHERE id = 1");
     $count = $stmt->fetch(PDO::FETCH_ASSOC);
     $pdo->commit();
